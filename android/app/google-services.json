@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "215737406861",
+    "project_id": "cargarage-942ba",
+    "storage_bucket": "cargarage-942ba.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:215737406861:android:ab39fc266631ada20f19c4",
+        "android_client_info": {
+          "package_name": "com.example.myapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdDhYcbykJ987IwyiuvfVakgv84b3AtgA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
