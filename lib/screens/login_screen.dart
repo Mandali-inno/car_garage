@@ -20,31 +20,54 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _isLoading = false;
+  String? _errorText;
 
-  Future<void> _handleSignIn(Future<User?> signInFuture, BuildContext context) async {
-    final firestoreService = Provider.of<FirestoreService>(context, listen: false);
+  Future<void> _handleSignIn(Future<User?> signInFuture) async {
+    setState(() {
+      _isLoading = true;
+      _errorText = null;
+    });
+
     try {
       final User? user = await signInFuture;
-      if (user != null && mounted) {
+      if (user == null) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+            _errorText = 'Sign-in failed. Please try again.';
+          });
+        }
+        return;
+      }
+
+      if (mounted) {
+        final firestoreService =
+            Provider.of<FirestoreService>(context, listen: false);
         final models.User? appUser = await firestoreService.getUser(user.uid);
-        if (appUser != null) {
+
+        if (appUser == null) {
+          setState(() {
+            _isLoading = false;
+            _errorText = 'User data not found. Please register.';
+          });
+          return;
+        }
+
+        if (mounted) {
           if (appUser.role == 'admin') {
             context.go('/admin');
           } else {
             context.go('/user');
           }
-        } else {
-          // Handle case where user exists in Auth but not in Firestore
-           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('User data not found. Please register.')),
-          );
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Sign-in failed: $e')),
-        );
+        setState(() {
+          _isLoading = false;
+          _errorText = 'Sign-in failed: ${e.toString()}';
+        });
       }
     }
   }
@@ -83,38 +106,61 @@ class _LoginScreenState extends State<LoginScreen> {
                 },
               ),
               const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    _handleSignIn(
-                      authService.signInWithEmailAndPassword(
-                        _emailController.text,
-                        _passwordController.text,
-                      ),
-                      context,
-                    );
-                  }
-                },
-                child: const Text('Login'),
-              ),
+              if (_isLoading)
+                const CircularProgressIndicator()
+              else
+                ElevatedButton(
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      _handleSignIn(
+                        authService.signInWithEmailAndPassword(
+                          _emailController.text,
+                          _passwordController.text,
+                        ),
+                      );
+                    }
+                  },
+                  child: const Text('Login'),
+                ),
+              if (_errorText != null) ...[
+                const SizedBox(height: 10),
+                Text(
+                  _errorText!,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ],
               const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () => _handleSignIn(authService.signInWithGoogle(), context),
-                child: const Text('Sign in with Google'),
+              ElevatedButton.icon(
+                onPressed: () => _handleSignIn(authService.signInWithGoogle()),
+                icon: Image.asset('assets/images/google_logo.png',
+                    height: 24.0),
+                label: const Text('Sign in with Google'),
               ),
               const SizedBox(height: 10),
               if (Platform.isIOS) ...[
-                ElevatedButton(
-                  onPressed: () => _handleSignIn(authService.signInWithApple(), context),
-                  child: const Text('Sign in with Apple'),
+                ElevatedButton.icon(
+                  onPressed: () => _handleSignIn(authService.signInWithApple()),
+                  icon:
+                      Image.asset('assets/images/apple_logo.png', height: 24.0),
+                  label: const Text('Sign in with Apple'),
                 ),
                 const SizedBox(height: 10),
               ],
+              const Row(
+                children: [
+                  Expanded(child: Divider()),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text('or'),
+                  ),
+                  Expanded(child: Divider()),
+                ],
+              ),
               TextButton(
                 onPressed: () {
                   context.go('/registration');
                 },
-                child: const Text('Don\'t have an account? Register'),
+                child: const Text("Don't have an account? Register"),
               ),
             ],
           ),
