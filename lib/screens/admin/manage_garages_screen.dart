@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../models.dart';
 import '../../services/firestore_service.dart';
 import 'add_garage_screen.dart';
@@ -17,10 +18,7 @@ class ManageGaragesScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AddGarageScreen()),
-              );
+              context.go('/add-garage');
             },
           ),
         ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class UserDashboardScreen extends StatelessWidget {
   const UserDashboardScreen({super.key});
@@ -15,13 +16,13 @@ class UserDashboardScreen extends StatelessWidget {
           children: [
             ElevatedButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/garage-list');
+                context.go('/garage-list');
               },
               child: const Text('View Garages'),
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/emergency-request');
+                context.go('/emergency-request');
               },
               child: const Text('Request Emergency Service'),
             ),
