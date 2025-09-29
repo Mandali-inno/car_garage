@@ -2,11 +2,12 @@
 # see: https://firebase.google.com/docs/studio/customize-workspace
 { pkgs, ... }: {
   # Which nixpkgs channel to use.
-  channel = "stable-24.05"; # or "unstable"
+  channel = "stable-23.11"; # or "unstable"
   # Use https://search.nixos.org/packages to find packages
   packages = [
-    pkgs.jdk21
-    pkgs.unzip
+    pkgs.flutter
+    pkgs.dart
+    pkgs.jdk
   ];
   # Sets environment variables in the workspace
   env = {};
@@ -18,8 +19,19 @@
     ];
     workspace = {
       # Runs when a workspace is first created with this `dev.nix` file
-      onCreate = { };
+      onCreate = {
+        # Example:
+        # get-started = ''
+        #   echo "Hello, world!" > .idx/getting-started.md
+        # '';
+      };
       # To run something each time the workspace is (re)started, use the `onStart` hook
+      onStart = {
+        # Example:
+        # hello = ''
+        #   echo "Welcome back to your workspace!"
+        # '';
+      };
     };
     # Enable previews and customize configuration
     previews = {
@@ -30,7 +42,7 @@
           manager = "flutter";
         };
         android = {
-          command = ["flutter" "run" "--machine" "-d" "android" "-d" "localhost:5555"];
+          command = ["flutter" "run" "--machine" "-d" "android"];
           manager = "flutter";
         };
       };

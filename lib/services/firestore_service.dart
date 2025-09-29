@@ -1,35 +1,85 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models.dart';
 
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  Future<void> addInitialData() async {
-    final garages = [
-      {
-        'name': 'Pimp My Ride',
-        'location': const GeoPoint(40.7128, -74.0060),
-        'services': ['General', 'Washing'],
-      },
-      {
-        'name': 'The Auto Shop',
-        'location': const GeoPoint(34.0522, -118.2437),
-        'services': ['Painting', 'Tuning'],
-      },
-    ];
+  // User operations
+  Future<void> addUser(User user) {
+    return _db.collection('users').doc(user.uid).set(user.toFirestore());
+  }
 
-    final services = [
-      {'name': 'General', 'price': 100.0},
-      {'name': 'Washing', 'price': 50.0},
-      {'name': 'Painting', 'price': 200.0},
-      {'name': 'Tuning', 'price': 150.0},
-    ];
-
-    for (final garage in garages) {
-      await _db.collection('garages').add(garage);
+  Future<User?> getUser(String uid) async {
+    DocumentSnapshot doc = await _db.collection('users').doc(uid).get();
+    if (doc.exists) {
+      return User.fromFirestore(doc);
     }
+    return null;
+  }
 
-    for (final service in services) {
-      await _db.collection('services').add(service);
-    }
+  // Garage operations
+  Future<void> addGarage(Garage garage) {
+    return _db.collection('garages').add(garage.toFirestore());
+  }
+
+  Stream<List<Garage>> getGarages() {
+    return _db.collection('garages').snapshots().map((snapshot) =>
+        snapshot.docs.map((doc) => Garage.fromFirestore(doc)).toList());
+  }
+
+  Future<void> updateGarage(Garage garage) {
+    return _db.collection('garages').doc(garage.id).update(garage.toFirestore());
+  }
+
+  Future<void> deleteGarage(String garageId) {
+    return _db.collection('garages').doc(garageId).delete();
+  }
+
+  // Service operations
+  Future<void> addService(Service service) {
+    return _db.collection('services').add(service.toFirestore());
+  }
+
+  Stream<List<Service>> getServices(String garageId) {
+    return _db.collection('services').where('garageId', isEqualTo: garageId).snapshots().map((snapshot) =>
+        snapshot.docs.map((doc) => Service.fromFirestore(doc)).toList());
+  }
+
+  Future<void> updateService(Service service) {
+    return _db.collection('services').doc(service.id).update(service.toFirestore());
+  }
+
+  Future<void> deleteService(String serviceId) {
+    return _db.collection('services').doc(serviceId).delete();
+  }
+
+  // Booking operations
+  Future<void> createBooking(Booking booking) {
+    return _db.collection('bookings').add(booking.toFirestore());
+  }
+
+  Stream<List<Booking>> getUserBookings(String userId) {
+    return _db.collection('bookings').where('userId', isEqualTo: userId).snapshots().map((snapshot) =>
+        snapshot.docs.map((doc) => Booking.fromFirestore(doc)).toList());
+  }
+
+  // Rating operations
+  Future<void> addRating(Rating rating) {
+    return _db.collection('ratings').add(rating.toFirestore());
+  }
+
+  Stream<List<Rating>> getGarageRatings(String garageId) {
+    return _db.collection('ratings').where('garageId', isEqualTo: garageId).snapshots().map((snapshot) =>
+        snapshot.docs.map((doc) => Rating.fromFirestore(doc)).toList());
+  }
+
+  // Emergency Service Request operations
+  Future<void> createEmergencyRequest(EmergencyServiceRequest request) {
+    return _db.collection('emergencyRequests').add(request.toFirestore());
+  }
+
+  Stream<List<EmergencyServiceRequest>> getEmergencyRequests() {
+    return _db.collection('emergencyRequests').where('status', isEqualTo: 'pending').snapshots().map((snapshot) =>
+        snapshot.docs.map((doc) => EmergencyServiceRequest.fromFirestore(doc)).toList());
   }
 }

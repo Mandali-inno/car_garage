@@ -14,6 +14,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  String _selectedRole = 'user';
 
   @override
   Widget build(BuildContext context) {
@@ -49,12 +50,34 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 },
               ),
               const SizedBox(height: 20),
+              DropdownButtonFormField<String>(
+                initialValue: _selectedRole,
+                items: ['user', 'admin']
+                    .map((role) => DropdownMenuItem(
+                          value: role,
+                          child: Text(role == 'admin' ? 'Garage Owner' : 'User'),
+                        ))
+                    .toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() {
+                      _selectedRole = value;
+                    });
+                  }
+                },
+                decoration: const InputDecoration(
+                  labelText: 'Select Role',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     await authService.createUserWithEmailAndPassword(
                       _emailController.text,
                       _passwordController.text,
+                      _selectedRole,
                     );
                     if (mounted) {
                       Navigator.pop(context);
