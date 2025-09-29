@@ -1,27 +1,21 @@
-# Project Blueprint
+# Car Garage App
 
-## Overview
+This application allows users to find and manage car garages. 
 
-This is a Flutter application that uses Firebase for authentication and other backend services. The app is currently under development and the main goal is to create a robust and scalable application with a clean architecture.
+## Features:
 
-## Features
+* User authentication with email/password, Google Sign-In, and Apple Sign-In.
+* Garage registration and management.
+* View garage details.
+* User profile screen.
 
-*   **Firebase Integration:** The app is connected to a Firebase project.
-*   **Google Sign-In:** The app uses Google Sign-In for user authentication.
+## Current Task: Add iOS Support and Apple Sign-In
 
-## Current Status
+### Plan:
 
-The application is now building and running on the emulator. The Google Sign-In is not yet functional and requires the addition of a SHA-1 fingerprint to the Firebase project. The necessary instructions have been provided in the `docs/login_setup_instructions.md` file.
-
-## Development Log
-
-*   **Initial Setup:** The project was created and Firebase was integrated.
-*   **Google Sign-In Implementation:** The `google_sign_in` package was added to the project, but it caused persistent build errors.
-*   **Troubleshooting:** The following steps were taken to resolve the build issues:
-    *   `flutter clean`
-    *   `flutter pub get`
-    *   Deleted `pubspec.lock` and re-ran `flutter pub get`
-    *   Reinstalled the `google_sign_in` package
-    *   Downgraded the `google_sign_in` package to `6.2.1`
-*   **Resolution:** The build errors were resolved by downgrading the `google_sign_in` package.
-*   **Next Steps:** The next step is to add the SHA-1 fingerprint to the Firebase project to enable Google Sign-In.
+1.  **Create iOS app in Firebase:** An iOS app has been created in the Firebase project with the bundle ID `com.example.myapp.ios`.
+2.  **Add `sign_in_with_apple` dependency:** The `sign_in_with_apple` package has been added to `pubspec.yaml` to enable Apple Sign-In.
+3.  **Update `auth_service.dart`:** The `AuthService` class has been updated to include a `signInWithApple` method.
+4.  **Update `login_screen.dart`:** The `LoginScreen` now displays a "Sign in with Apple" button on iOS devices.
+5.  **Create iOS project files:** The necessary iOS project files have been created to enable the app to run on iOS.
+6.  **Add `GoogleService-Info.plist`:** The Firebase configuration file for iOS has been added to the project.

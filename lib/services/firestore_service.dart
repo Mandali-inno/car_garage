@@ -8,18 +8,12 @@ class FirestoreService {
       {
         'name': 'Pimp My Ride',
         'location': const GeoPoint(40.7128, -74.0060),
-        'services': [
-          'General',
-          'Washing',
-        ]
+        'services': ['General', 'Washing'],
       },
       {
         'name': 'The Auto Shop',
         'location': const GeoPoint(34.0522, -118.2437),
-        'services': [
-          'Painting',
-          'Tuning',
-        ]
+        'services': ['Painting', 'Tuning'],
       },
     ];
 

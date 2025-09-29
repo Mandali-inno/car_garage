@@ -25,19 +25,25 @@ class _GarageRegistrationScreenState extends State<GarageRegistrationScreen> {
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('You must be logged in to register a garage.')),
+          content: Text('You must be logged in to register a garage.'),
+        ),
       );
       return;
     }
 
     try {
-      final garageRef = await FirebaseFirestore.instance.collection('garages').add({
-        'ownerId': user.uid,
-        'name': _nameController.text,
-        'address': _addressController.text,
-        'phone': _phoneController.text,
-        'location': GeoPoint(_garageLocation!.latitude, _garageLocation!.longitude),
-      });
+      final garageRef = await FirebaseFirestore.instance
+          .collection('garages')
+          .add({
+            'ownerId': user.uid,
+            'name': _nameController.text,
+            'address': _addressController.text,
+            'phone': _phoneController.text,
+            'location': GeoPoint(
+              _garageLocation!.latitude,
+              _garageLocation!.longitude,
+            ),
+          });
 
       await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
         'role': 'garage_owner',
@@ -59,9 +65,7 @@ class _GarageRegistrationScreenState extends State<GarageRegistrationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Register Your Garage'),
-      ),
+      appBar: AppBar(title: const Text('Register Your Garage')),
       body: Stepper(
         currentStep: _currentStep,
         onStepContinue: () {
@@ -78,7 +82,9 @@ class _GarageRegistrationScreenState extends State<GarageRegistrationScreen> {
               });
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Please select a location on the map.')),
+                const SnackBar(
+                  content: Text('Please select a location on the map.'),
+                ),
               );
             }
           } else if (_currentStep == 2) {
@@ -152,7 +158,10 @@ class _GarageRegistrationScreenState extends State<GarageRegistrationScreen> {
               height: 300,
               child: GoogleMap(
                 initialCameraPosition: const CameraPosition(
-                  target: LatLng(37.7749, -122.4194), // Default to San Francisco
+                  target: LatLng(
+                    37.7749,
+                    -122.4194,
+                  ), // Default to San Francisco
                   zoom: 12,
                 ),
                 onTap: (location) {
@@ -181,7 +190,9 @@ class _GarageRegistrationScreenState extends State<GarageRegistrationScreen> {
                 Text('Address: ${_addressController.text}'),
                 Text('Phone: ${_phoneController.text}'),
                 if (_garageLocation != null)
-                  Text('Location: ${_garageLocation!.latitude}, ${_garageLocation!.longitude}'),
+                  Text(
+                    'Location: ${_garageLocation!.latitude}, ${_garageLocation!.longitude}',
+                  ),
               ],
             ),
             isActive: _currentStep >= 2,

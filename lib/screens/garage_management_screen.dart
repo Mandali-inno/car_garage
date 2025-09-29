@@ -20,9 +20,7 @@ class _GarageManagementScreenState extends State<GarageManagementScreen> {
 
     if (user == null) {
       return const Scaffold(
-        body: Center(
-          child: Text('You must be logged in to manage a garage.'),
-        ),
+        body: Center(child: Text('You must be logged in to manage a garage.')),
       );
     }
 
@@ -168,7 +166,9 @@ class _ServicesViewState extends State<_ServicesView> {
   Future<void> _showEditServiceDialog(DocumentSnapshot service) async {
     final formKey = GlobalKey<FormState>();
     final nameController = TextEditingController(text: service['name']);
-    final priceController = TextEditingController(text: service['price'].toString());
+    final priceController = TextEditingController(
+      text: service['price'].toString(),
+    );
 
     return showDialog(
       context: context,
@@ -255,7 +255,9 @@ class _ServicesViewState extends State<_ServicesView> {
 
   @override
   Widget build(BuildContext context) {
-    final garageRef = FirebaseFirestore.instance.collection('garages').doc(widget.user.uid);
+    final garageRef = FirebaseFirestore.instance
+        .collection('garages')
+        .doc(widget.user.uid);
 
     return Scaffold(
       body: StreamBuilder<QuerySnapshot>(
@@ -284,14 +286,8 @@ class _ServicesViewState extends State<_ServicesView> {
                 subtitle: Text('₹${service['price']}'),
                 trailing: PopupMenuButton(
                   itemBuilder: (context) => [
-                    const PopupMenuItem(
-                      value: 'edit',
-                      child: Text('Edit'),
-                    ),
-                    const PopupMenuItem(
-                      value: 'delete',
-                      child: Text('Delete'),
-                    ),
+                    const PopupMenuItem(value: 'edit', child: Text('Edit')),
+                    const PopupMenuItem(value: 'delete', child: Text('Delete')),
                   ],
                   onSelected: (value) {
                     if (value == 'edit') {
@@ -407,13 +403,15 @@ class _ProfileViewState extends State<_ProfileView> {
     final File imageFile = File(image.path);
 
     try {
-      final Reference storageRef =
-          FirebaseStorage.instance.ref().child('garages/$garageId/profile.jpg');
+      final Reference storageRef = FirebaseStorage.instance.ref().child(
+        'garages/$garageId/profile.jpg',
+      );
       await storageRef.putFile(imageFile);
       final String downloadUrl = await storageRef.getDownloadURL();
-      await FirebaseFirestore.instance.collection('garages').doc(garageId).update({
-        'imageUrl': downloadUrl,
-      });
+      await FirebaseFirestore.instance
+          .collection('garages')
+          .doc(garageId)
+          .update({'imageUrl': downloadUrl});
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Image uploaded successfully!')),
       );
@@ -426,7 +424,9 @@ class _ProfileViewState extends State<_ProfileView> {
 
   @override
   Widget build(BuildContext context) {
-    final garageRef = FirebaseFirestore.instance.collection('garages').doc(widget.user.uid);
+    final garageRef = FirebaseFirestore.instance
+        .collection('garages')
+        .doc(widget.user.uid);
 
     return SingleChildScrollView(
       child: Padding(
@@ -462,7 +462,11 @@ class _ProfileViewState extends State<_ProfileView> {
                     width: double.infinity,
                     height: 200,
                     color: Colors.grey[300],
-                    child: const Icon(Icons.image, size: 100, color: Colors.grey),
+                    child: const Icon(
+                      Icons.image,
+                      size: 100,
+                      color: Colors.grey,
+                    ),
                   ),
                 const SizedBox(height: 16),
                 ElevatedButton(

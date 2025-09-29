@@ -20,10 +20,7 @@ class ProfileScreen extends StatelessWidget {
             flexibleSpace: FlexibleSpaceBar(
               title: Text(user?.displayName ?? 'Your Profile'),
               background: user?.photoURL != null
-                  ? Image.network(
-                      user!.photoURL!,
-                      fit: BoxFit.cover,
-                    )
+                  ? Image.network(user!.photoURL!, fit: BoxFit.cover)
                   : Container(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -44,12 +41,19 @@ class ProfileScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(user?.email ?? '', style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    user?.email ?? '',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   const SizedBox(height: 24),
                   StreamBuilder<DocumentSnapshot>(
-                    stream: FirebaseFirestore.instance.collection('users').doc(user?.uid).snapshots(),
+                    stream: FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(user?.uid)
+                        .snapshots(),
                     builder: (context, snapshot) {
-                      if (!snapshot.hasData || snapshot.data!['role'] != 'garage_owner') {
+                      if (!snapshot.hasData ||
+                          snapshot.data!['role'] != 'garage_owner') {
                         return const SizedBox.shrink();
                       }
                       return Center(
@@ -58,7 +62,10 @@ class ProfileScreen extends StatelessWidget {
                           icon: const Icon(Icons.store),
                           label: const Text('Manage My Garage'),
                           style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 32,
+                              vertical: 12,
+                            ),
                             textStyle: Theme.of(context).textTheme.titleMedium,
                           ),
                         ),
@@ -66,7 +73,12 @@ class ProfileScreen extends StatelessWidget {
                     },
                   ),
                   const SizedBox(height: 24),
-                  Text('My Bookings', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+                  Text(
+                    'My Bookings',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const Divider(thickness: 2),
                   const SizedBox(height: 16),
                 ],
@@ -90,11 +102,15 @@ class ProfileScreen extends StatelessWidget {
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return const SliverToBoxAdapter(child: Center(child: Text('Something went wrong')));
+            return const SliverToBoxAdapter(
+              child: Center(child: Text('Something went wrong')),
+            );
           }
 
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const SliverToBoxAdapter(child: Center(child: CircularProgressIndicator()));
+            return const SliverToBoxAdapter(
+              child: Center(child: CircularProgressIndicator()),
+            );
           }
 
           final bookings = snapshot.data!.docs;
@@ -114,49 +130,59 @@ class ProfileScreen extends StatelessWidget {
           }
 
           return SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final booking = bookings[index];
-                final date = (booking['timestamp'] as Timestamp).toDate();
-                return Card(
-                  elevation: 4,
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      child: const Icon(Icons.receipt, color: Colors.white),
-                    ),
-                    title: Text(
-                      booking['serviceName'],
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: FutureBuilder<DocumentSnapshot>(
-                      future: FirebaseFirestore.instance.collection('garages').doc(booking['garageId']).get(),
-                      builder: (context, garageSnapshot) {
-                        if (garageSnapshot.connectionState == ConnectionState.done && garageSnapshot.hasData) {
-                          return Text('at ${garageSnapshot.data!['name']}');
-                        } else {
-                          return const Text('Loading garage...');
-                        }
-                      },
-                    ),
-                    trailing: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          '₹${booking['servicePrice']}',
-                          style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.secondary),
-                        ),
-                        Text('${date.day}/${date.month}/${date.year}', style: Theme.of(context).textTheme.bodySmall),
-                      ],
-                    ),
+            delegate: SliverChildBuilderDelegate((context, index) {
+              final booking = bookings[index];
+              final date = (booking['timestamp'] as Timestamp).toDate();
+              return Card(
+                elevation: 4,
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    child: const Icon(Icons.receipt, color: Colors.white),
                   ),
-                );
-              },
-              childCount: bookings.length,
-            ),
+                  title: Text(
+                    booking['serviceName'],
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: FutureBuilder<DocumentSnapshot>(
+                    future: FirebaseFirestore.instance
+                        .collection('garages')
+                        .doc(booking['garageId'])
+                        .get(),
+                    builder: (context, garageSnapshot) {
+                      if (garageSnapshot.connectionState ==
+                              ConnectionState.done &&
+                          garageSnapshot.hasData) {
+                        return Text('at ${garageSnapshot.data!['name']}');
+                      } else {
+                        return const Text('Loading garage...');
+                      }
+                    },
+                  ),
+                  trailing: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        '₹${booking['servicePrice']}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.secondary,
+                        ),
+                      ),
+                      Text(
+                        '${date.day}/${date.month}/${date.year}',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }, childCount: bookings.length),
           );
         },
       ),

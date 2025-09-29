@@ -17,18 +17,20 @@ class _GarageDetailsScreenState extends State<GarageDetailsScreen> {
   final _reviewController = TextEditingController();
 
   Future<void> _makePhoneCall(String phoneNumber) async {
-    final Uri launchUri = Uri(
-      scheme: 'tel',
-      path: phoneNumber,
-    );
+    final Uri launchUri = Uri(scheme: 'tel', path: phoneNumber);
     await launchUrl(launchUri);
   }
 
-  Future<void> _bookService(BuildContext context, DocumentSnapshot service) async {
+  Future<void> _bookService(
+    BuildContext context,
+    DocumentSnapshot service,
+  ) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('You must be logged in to book a service.')),
+        const SnackBar(
+          content: Text('You must be logged in to book a service.'),
+        ),
       );
       return;
     }
@@ -51,15 +53,17 @@ class _GarageDetailsScreenState extends State<GarageDetailsScreen> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('You must be logged in to submit a review.')),
+        const SnackBar(
+          content: Text('You must be logged in to submit a review.'),
+        ),
       );
       return;
     }
 
     if (_rating == 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a rating.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please select a rating.')));
       return;
     }
 
@@ -86,7 +90,10 @@ class _GarageDetailsScreenState extends State<GarageDetailsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: FutureBuilder<DocumentSnapshot>(
-        future: FirebaseFirestore.instance.collection('garages').doc(widget.garageId).get(),
+        future: FirebaseFirestore.instance
+            .collection('garages')
+            .doc(widget.garageId)
+            .get(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return const Center(child: Text('Something went wrong'));
@@ -111,13 +118,14 @@ class _GarageDetailsScreenState extends State<GarageDetailsScreen> {
                 flexibleSpace: FlexibleSpaceBar(
                   title: Text(garage['name']),
                   background: garage['imageUrl'] != null
-                      ? Image.network(
-                          garage['imageUrl'],
-                          fit: BoxFit.cover,
-                        )
+                      ? Image.network(garage['imageUrl'], fit: BoxFit.cover)
                       : Container(
                           color: Colors.grey[300],
-                          child: const Icon(Icons.image, size: 100, color: Colors.grey),
+                          child: const Icon(
+                            Icons.image,
+                            size: 100,
+                            color: Colors.grey,
+                          ),
                         ),
                 ),
               ),
@@ -127,7 +135,10 @@ class _GarageDetailsScreenState extends State<GarageDetailsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(garage['address'], style: Theme.of(context).textTheme.bodyLarge),
+                      Text(
+                        garage['address'],
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
                       const SizedBox(height: 16),
                       ElevatedButton.icon(
                         onPressed: () {
@@ -139,7 +150,10 @@ class _GarageDetailsScreenState extends State<GarageDetailsScreen> {
                       const SizedBox(height: 16),
                       const Divider(),
                       const SizedBox(height: 16),
-                      Text('Services', style: Theme.of(context).textTheme.titleLarge),
+                      Text(
+                        'Services',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
                       _buildServicesList(),
                       const SizedBox(height: 16),
                       const Divider(),
@@ -148,7 +162,10 @@ class _GarageDetailsScreenState extends State<GarageDetailsScreen> {
                       const SizedBox(height: 16),
                       const Divider(),
                       const SizedBox(height: 16),
-                      Text('Reviews', style: Theme.of(context).textTheme.titleLarge),
+                      Text(
+                        'Reviews',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
                       _buildReviews(),
                     ],
                   ),
