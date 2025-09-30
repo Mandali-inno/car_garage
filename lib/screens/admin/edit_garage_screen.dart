@@ -2,28 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../models.dart';
 import '../../services/firestore_service.dart';
-import 'package:firebase_auth/firebase_auth.dart' as fAuth;
 
-class AddGarageScreen extends StatefulWidget {
-  const AddGarageScreen({super.key});
+class EditGarageScreen extends StatefulWidget {
+  final Garage garage;
+
+  const EditGarageScreen({super.key, required this.garage});
 
   @override
-  State<AddGarageScreen> createState() => _AddGarageScreenState();
+  State<EditGarageScreen> createState() => _EditGarageScreenState();
 }
 
-class _AddGarageScreenState extends State<AddGarageScreen> {
+class _EditGarageScreenState extends State<EditGarageScreen> {
   final FirestoreService _firestoreService = FirestoreService();
-  final fAuth.FirebaseAuth _auth = fAuth.FirebaseAuth.instance;
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _latitudeController = TextEditingController();
-  final _longitudeController = TextEditingController();
+  late TextEditingController _nameController;
+  late TextEditingController _latitudeController;
+  late TextEditingController _longitudeController;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.garage.name);
+    _latitudeController = TextEditingController(text: widget.garage.location.latitude.toString());
+    _longitudeController = TextEditingController(text: widget.garage.location.longitude.toString());
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Garage'),
+        title: const Text('Edit Garage'),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -89,8 +97,8 @@ class _AddGarageScreenState extends State<AddGarageScreen> {
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 50),
                   ),
-                  onPressed: _addGarage,
-                  child: const Text('Add Garage'),
+                  onPressed: _updateGarage,
+                  child: const Text('Update Garage'),
                 ),
               ],
             ),
@@ -100,26 +108,19 @@ class _AddGarageScreenState extends State<AddGarageScreen> {
     );
   }
 
-  void _addGarage() async {
+  void _updateGarage() async {
     if (_formKey.currentState!.validate()) {
-      fAuth.User? currentUser = _auth.currentUser;
-      if (currentUser != null) {
-        final garage = Garage(
-          id: '', // Firestore will generate ID
-          name: _nameController.text,
-          location: GeoPoint(
-            double.parse(_latitudeController.text),
-            double.parse(_longitudeController.text),
-          ),
-          ownerId: currentUser.uid,
-        );
-        await _firestoreService.addGarage(garage);
-        Navigator.pop(context);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You must be logged in to add a garage')),
-        );
-      }
+      final updatedGarage = Garage(
+        id: widget.garage.id,
+        name: _nameController.text,
+        location: GeoPoint(
+          double.parse(_latitudeController.text),
+          double.parse(_longitudeController.text),
+        ),
+        ownerId: widget.garage.ownerId,
+      );
+      await _firestoreService.updateGarage(updatedGarage);
+      Navigator.pop(context);
     }
   }
 }

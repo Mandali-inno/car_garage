@@ -5,14 +5,14 @@ import '../../models.dart';
 import '../../services/firestore_service.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fAuth;
 
-class EmergencyRequestScreen extends StatefulWidget {
-  const EmergencyRequestScreen({super.key});
+class EmergencyServiceScreen extends StatefulWidget {
+  const EmergencyServiceScreen({super.key});
 
   @override
-  State<EmergencyRequestScreen> createState() => _EmergencyRequestScreenState();
+  State<EmergencyServiceScreen> createState() => _EmergencyServiceScreenState();
 }
 
-class _EmergencyRequestScreenState extends State<EmergencyRequestScreen> {
+class _EmergencyServiceScreenState extends State<EmergencyServiceScreen> {
   final FirestoreService _firestoreService = FirestoreService();
   String _selectedService = 'breakdown';
   Position? _currentPosition;

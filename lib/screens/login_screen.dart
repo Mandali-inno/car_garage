@@ -77,92 +77,118 @@ class _LoginScreenState extends State<LoginScreen> {
     final authService = Provider.of<AuthService>(context, listen: false);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(labelText: 'Email'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your email';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _passwordController,
-                decoration: const InputDecoration(labelText: 'Password'),
-                obscureText: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your password';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20),
-              if (_isLoading)
-                const CircularProgressIndicator()
-              else
-                ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      _handleSignIn(
-                        authService.signInWithEmailAndPassword(
-                          _emailController.text,
-                          _passwordController.text,
-                        ),
-                      );
-                    }
-                  },
-                  child: const Text('Login'),
-                ),
-              if (_errorText != null) ...[
-                const SizedBox(height: 10),
-                Text(
-                  _errorText!,
-                  style: const TextStyle(color: Colors.red),
-                ),
-              ],
-              const SizedBox(height: 10),
-              ElevatedButton.icon(
-                onPressed: () => _handleSignIn(authService.signInWithGoogle()),
-                icon: Image.asset('assets/images/google_logo.png',
-                    height: 24.0),
-                label: const Text('Sign in with Google'),
-              ),
-              const SizedBox(height: 10),
-              if (Platform.isIOS) ...[
-                ElevatedButton.icon(
-                  onPressed: () => _handleSignIn(authService.signInWithApple()),
-                  icon:
-                      Image.asset('assets/images/apple_logo.png', height: 24.0),
-                  label: const Text('Sign in with Apple'),
-                ),
-                const SizedBox(height: 10),
-              ],
-              const Row(
-                children: [
-                  Expanded(child: Divider()),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text('or'),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(height: 100),
+                Text('Welcome Back!', style: Theme.of(context).textTheme.headlineLarge),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    prefixIcon: Icon(Icons.email),
+                    border: OutlineInputBorder(),
                   ),
-                  Expanded(child: Divider()),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your email';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _passwordController,
+                  decoration: const InputDecoration(
+                    labelText: 'Password',
+                    prefixIcon: Icon(Icons.lock),
+                    border: OutlineInputBorder(),
+                  ),
+                  obscureText: true,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your password';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+                if (_isLoading)
+                  const CircularProgressIndicator()
+                else
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 50),
+                    ),
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        _handleSignIn(
+                          authService.signInWithEmailAndPassword(
+                            _emailController.text,
+                            _passwordController.text,
+                          ),
+                        );
+                      }
+                    },
+                    child: const Text('Login'),
+                  ),
+                if (_errorText != null) ...[
+                  const SizedBox(height: 10),
+                  Text(
+                    _errorText!,
+                    style: const TextStyle(color: Colors.red),
+                  ),
                 ],
-              ),
-              TextButton(
-                onPressed: () {
-                  context.go('/registration');
-                },
-                child: const Text("Don't have an account? Register"),
-              ),
-            ],
+                const SizedBox(height: 20),
+                const Row(
+                  children: [
+                    Expanded(child: Divider()),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text('or'),
+                    ),
+                    Expanded(child: Divider()),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 50),
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                  ),
+                  onPressed: () => _handleSignIn(authService.signInWithGoogle()),
+                  icon: Image.asset('assets/images/google_logo.png', height: 24.0),
+                  label: const Text('Sign in with Google'),
+                ),
+                const SizedBox(height: 10),
+                if (Platform.isIOS) ...[
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 50),
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: () => _handleSignIn(authService.signInWithApple()),
+                    icon: Image.asset('assets/images/apple_logo.png', height: 24.0, color: Colors.white),
+                    label: const Text('Sign in with Apple'),
+                  ),
+                ],
+                const SizedBox(height: 20),
+                TextButton(
+                  onPressed: () {
+                    context.go('/registration');
+                  },
+                  child: const Text("Don't have an account? Register"),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../models.dart';
 import '../../services/firestore_service.dart';
-import 'add_garage_screen.dart';
+import 'edit_garage_screen.dart';
 
 class ManageGaragesScreen extends StatelessWidget {
   final FirestoreService _firestoreService = FirestoreService();
@@ -39,27 +39,39 @@ class ManageGaragesScreen extends StatelessWidget {
           List<Garage> garages = snapshot.data!;
 
           return ListView.builder(
+            padding: const EdgeInsets.all(8),
             itemCount: garages.length,
             itemBuilder: (context, index) {
               Garage garage = garages[index];
-              return ListTile(
-                title: Text(garage.name),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () {
-                        // TODO: Implement edit garage functionality
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () {
-                        _firestoreService.deleteGarage(garage.id);
-                      },
-                    ),
-                  ],
+              return Card(
+                elevation: 2,
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                child: ListTile(
+                  leading: const Icon(Icons.store, size: 40),
+                  title: Text(garage.name, style: Theme.of(context).textTheme.titleLarge),
+                  subtitle: Text('Lat: ${garage.location.latitude}, Long: ${garage.location.longitude}'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EditGarageScreen(garage: garage),
+                            ),
+                          );
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () {
+                          _firestoreService.deleteGarage(garage.id);
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               );
             },

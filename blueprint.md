@@ -1,1 +1,60 @@
-# Car Service Finder App\n\n## Overview\n\nThis Flutter application allows users to find and book car services from nearby garages. It also provides an interface for garage owners to manage their services and bookings.\n\n## Features\n\n### User Features\n\n*   **Authentication:** Users can sign up and log in using email/password, Google Sign-In, or Apple Sign-In.\n*   **Dashboard:** A user dashboard provides access to the main features of the app.\n*   **Garage Discovery:** Users can view a list of garages, sorted by their proximity to the user's current location.\n*   **Garage Details:** Users can view detailed information about a specific garage, including the services offered and user ratings.\n*   **Service Booking:** Users can book a service from a garage for a specific date and time.\n*   **Emergency Services:** Users can request emergency services like a breakdown, tire swap, or battery jump.\n\n### Admin (Garage Owner) Features\n\n*   **Authentication:** Garage owners can sign up and log in using email/password.\n*   **Dashboard:** An admin dashboard provides access to garage management features.\n*   **Garage Management:** Garage owners can add, edit, and delete their garages.\n\n## Technical Details\n\n*   **Frontend:** Flutter\n*   **Backend:** Firebase (Authentication, Firestore, Cloud Storage)\n*   **State Management:** Provider\n*   **Routing:** go\_router\n*   **Location Services:** geolocator\n\n## Current Plan\n\n*   **Task:** Implement user roles and role-based access control.\n*   **Status:** Completed.\n*   **Steps taken:**\n    *   Added a `role` field to the `User` model.\n    *   Updated the registration screen to allow users to select a role (user or admin).\n    *   Updated the authentication service to create users with the selected role.\n    *   Updated the `main.dart` file to handle routing based on the user's role.\n    *   Created separate dashboards for users and admins.\n    *   Implemented features for both user and admin roles.
+# Car Service Finder Blueprint
+
+## Overview
+
+This document outlines the architecture, design, and features of the Car Service Finder application.
+
+## Project Structure
+
+```
+lib/
+├── main.dart
+├── models.dart
+├── services/
+│   ├── auth_service.dart
+│   └── firestore_service.dart
+└── screens/
+    ├── admin/
+    │   ├── add_garage_screen.dart
+    │   ├── admin_dashboard_screen.dart
+    │   ├── emergency_requests_screen.dart
+    │   └── manage_garages_screen.dart
+    ├── user/
+    │   ├── book_service_screen.dart
+    │   ├── emergency_service_screen.dart
+    │   ├── garage_details_screen.dart
+    │   ├── garage_list_screen.dart
+    │   └── user_bookings_screen.dart
+    │   └── user_dashboard_screen.dart
+    ├── login_screen.dart
+    └── registration_screen.dart
+```
+
+## Design
+
+The application uses the Material Design 3 design system with a purple-based color scheme. The typography is based on the Oswald, Roboto, and Open Sans font families, provided by the `google_fonts` package.
+
+The UI is designed to be modern, clean, and user-friendly, with a focus on intuitive navigation and clear information hierarchy. The main layout consists of a `Scaffold` with a `BottomNavigationBar` for user roles and a `Drawer` for admin roles, providing easy access to all the app's features.
+
+## Features
+
+### User Authentication
+
+*   Users can register for a new account or log in with their existing credentials.
+*   The app uses Firebase Authentication for secure user authentication.
+*   Role-based access control is implemented to differentiate between regular users and administrators.
+
+### User Features
+
+*   **Dashboard:** Displays a welcome message and provides access to the app's main features.
+*   **Garage List:** Shows a list of nearby garages, sorted by distance from the user's current location.
+*   **Garage Details:** Provides detailed information about a selected garage, including its services and ratings.
+*   **Book Service:** Allows users to book a service from a selected garage.
+*   **My Bookings:** Displays a list of all the user's past and upcoming bookings.
+*   **Emergency Service:** Enables users to request emergency assistance by sending their current location and a description of the emergency to the admins.
+
+### Admin Features
+
+*   **Dashboard:** Provides an overview of the system and access to the admin features.
+*   **Manage Garages:** Allows admins to add, edit, and delete garages.
+*   **Emergency Requests:** Displays a list of pending emergency service requests, with the ability to view the user's location on a map.

@@ -15,82 +15,110 @@ class GarageDetailsScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(garage.name),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Services', style: Theme.of(context).textTheme.headlineSmall),
-            StreamBuilder<List<Service>>(
-              stream: _firestoreService.getServices(garage.id),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                }
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const CircularProgressIndicator();
-                }
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Text('No services available.');
-                }
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Card(
+                elevation: 2,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Services', style: Theme.of(context).textTheme.headlineSmall),
+                      const SizedBox(height: 10),
+                      StreamBuilder<List<Service>>(
+                        stream: _firestoreService.getServices(garage.id),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasError) {
+                            return Text('Error: ${snapshot.error}');
+                          }
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const CircularProgressIndicator();
+                          }
+                          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                            return const Text('No services available.');
+                          }
 
-                List<Service> services = snapshot.data!;
+                          List<Service> services = snapshot.data!;
 
-                return Expanded(
-                  child: ListView.builder(
-                    itemCount: services.length,
-                    itemBuilder: (context, index) {
-                      Service service = services[index];
-                      return ListTile(
-                        title: Text(service.name),
-                        subtitle: Text('₹${service.price}'),
-                        trailing: ElevatedButton(
-                          onPressed: () {
-                            context.go(
-                              '/book-service',
-                              extra: {'garage': garage, 'service': service},
-                            );
-                          },
-                          child: const Text('Book Now'),
-                        ),
-                      );
-                    },
+                          return ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: services.length,
+                            itemBuilder: (context, index) {
+                              Service service = services[index];
+                              return ListTile(
+                                leading: const Icon(Icons.miscellaneous_services),
+                                title: Text(service.name),
+                                subtitle: Text('₹${service.price}'),
+                                trailing: ElevatedButton(
+                                  onPressed: () {
+                                    context.go(
+                                      '/book-service',
+                                      extra: {'garage': garage, 'service': service},
+                                    );
+                                  },
+                                  child: const Text('Book Now'),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ],
                   ),
-                );
-              },
-            ),
-            const SizedBox(height: 20),
-            Text('Ratings', style: Theme.of(context).textTheme.headlineSmall),
-            StreamBuilder<List<Rating>>(
-              stream: _firestoreService.getGarageRatings(garage.id),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                }
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const CircularProgressIndicator();
-                }
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Text('No ratings yet.');
-                }
+                ),
+              ),
+              const SizedBox(height: 20),
+              Card(
+                elevation: 2,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Ratings', style: Theme.of(context).textTheme.headlineSmall),
+                      const SizedBox(height: 10),
+                      StreamBuilder<List<Rating>>(
+                        stream: _firestoreService.getGarageRatings(garage.id),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasError) {
+                            return Text('Error: ${snapshot.error}');
+                          }
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const CircularProgressIndicator();
+                          }
+                          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                            return const Text('No ratings yet.');
+                          }
 
-                List<Rating> ratings = snapshot.data!;
+                          List<Rating> ratings = snapshot.data!;
 
-                return Expanded(
-                  child: ListView.builder(
-                    itemCount: ratings.length,
-                    itemBuilder: (context, index) {
-                      Rating rating = ratings[index];
-                      return ListTile(
-                        title: Text('Rating: ${rating.rating}'),
-                        subtitle: Text(rating.review),
-                      );
-                    },
+                          return ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: ratings.length,
+                            itemBuilder: (context, index) {
+                              Rating rating = ratings[index];
+                              return ListTile(
+                                leading: const Icon(Icons.star),
+                                title: Text('Rating: ${rating.rating}'),
+                                subtitle: Text(rating.review),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ],
                   ),
-                );
-              },
-            ),
-          ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

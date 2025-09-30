@@ -15,9 +15,11 @@ import 'screens/admin/admin_dashboard_screen.dart';
 import 'screens/user/garage_list_screen.dart';
 import 'screens/user/garage_details_screen.dart';
 import 'screens/user/book_service_screen.dart';
-import 'screens/user/emergency_request_screen.dart';
+import 'screens/user/user_bookings_screen.dart';
+import 'screens/user/emergency_service_screen.dart';
 import 'screens/admin/manage_garages_screen.dart';
 import 'screens/admin/add_garage_screen.dart';
+import 'screens/admin/emergency_requests_screen.dart';
 import 'services/auth_service.dart';
 import 'services/firestore_service.dart';
 import 'models.dart' as models;
@@ -152,23 +154,54 @@ class MyApp extends StatelessWidget {
                   return const RegistrationScreen();
                 },
               ),
-              GoRoute(
-                path: '/user',
-                builder: (BuildContext context, GoRouterState state) {
-                  return const UserDashboardScreen();
+              ShellRoute(
+                builder: (context, state, child) {
+                  return MainLayout(child: child);
                 },
-              ),
-              GoRoute(
-                path: '/admin',
-                builder: (BuildContext context, GoRouterState state) {
-                  return const AdminDashboardScreen();
-                },
-              ),
-              GoRoute(
-                path: '/garage-list',
-                builder: (BuildContext context, GoRouterState state) {
-                  return const GarageListScreen();
-                },
+                routes: [
+                  GoRoute(
+                    path: '/user',
+                    builder: (BuildContext context, GoRouterState state) {
+                      return const UserDashboardScreen();
+                    },
+                  ),
+                  GoRoute(
+                    path: '/garage-list',
+                    builder: (BuildContext context, GoRouterState state) {
+                      return const GarageListScreen();
+                    },
+                  ),
+                  GoRoute(
+                    path: '/my-bookings',
+                    builder: (BuildContext context, GoRouterState state) {
+                      return const UserBookingsScreen();
+                    },
+                  ),
+                  GoRoute(
+                    path: '/emergency-service',
+                    builder: (BuildContext context, GoRouterState state) {
+                      return EmergencyServiceScreen();
+                    },
+                  ),
+                  GoRoute(
+                    path: '/admin',
+                    builder: (BuildContext context, GoRouterState state) {
+                      return const AdminDashboardScreen();
+                    },
+                  ),
+                  GoRoute(
+                    path: '/manage-garages',
+                    builder: (BuildContext context, GoRouterState state) {
+                      return ManageGaragesScreen();
+                    },
+                  ),
+                  GoRoute(
+                    path: '/emergency-requests',
+                    builder: (BuildContext context, GoRouterState state) {
+                      return EmergencyRequestsScreen();
+                    },
+                  ),
+                ],
               ),
               GoRoute(
                 path: '/garage-details',
@@ -182,18 +215,6 @@ class MyApp extends StatelessWidget {
                 builder: (BuildContext context, GoRouterState state) {
                   final Map<String, dynamic> args = state.extra as Map<String, dynamic>;
                   return BookServiceScreen(garage: args['garage'], service: args['service']);
-                },
-              ),
-              GoRoute(
-                path: '/emergency-request',
-                builder: (BuildContext context, GoRouterState state) {
-                  return const EmergencyRequestScreen();
-                },
-              ),
-              GoRoute(
-                path: '/manage-garages',
-                builder: (BuildContext context, GoRouterState state) {
-                  return ManageGaragesScreen();
                 },
               ),
               GoRoute(
@@ -239,6 +260,101 @@ class MyApp extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+}
+
+class MainLayout extends StatefulWidget {
+  final Widget child;
+
+  const MainLayout({super.key, required this.child});
+
+  @override
+  State<MainLayout> createState() => _MainLayoutState();
+}
+
+class _MainLayoutState extends State<MainLayout> {
+  int _currentIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    final isUser = user != null; // Simplified check, you might want more specific role checks
+
+    return Scaffold(
+      body: widget.child,
+      bottomNavigationBar: isUser
+          ? BottomNavigationBar(
+              currentIndex: _currentIndex,
+              onTap: (index) {
+                setState(() {
+                  _currentIndex = index;
+                });
+                switch (index) {
+                  case 0:
+                    context.go('/user');
+                    break;
+                  case 1:
+                    context.go('/garage-list');
+                    break;
+                  case 2:
+                    context.go('/my-bookings');
+                    break;
+                }
+              },
+              items: const [
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.home),
+                  label: 'Home',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.store),
+                  label: 'Garages',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.history),
+                  label: 'Bookings',
+                ),
+              ],
+            )
+          : null,
+      drawer: isUser
+          ? null
+          : Drawer(
+              child: ListView(
+                children: [
+                  DrawerHeader(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    child: const Text('Admin Menu'),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.dashboard),
+                    title: const Text('Dashboard'),
+                    onTap: () => context.go('/admin'),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.store),
+                    title: const Text('Manage Garages'),
+                    onTap: () => context.go('/manage-garages'),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.warning),
+                    title: const Text('Emergency Requests'),
+                    onTap: () => context.go('/emergency-requests'),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.logout),
+                    title: const Text('Logout'),
+                    onTap: () {
+                      FirebaseAuth.instance.signOut();
+                      context.go('/login');
+                    },
+                  ),
+                ],
+              ),
+            ),
     );
   }
 }

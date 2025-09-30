@@ -37,7 +37,7 @@ class _GarageListScreenState extends State<GarageListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Garages'),
+        title: const Text('Nearby Garages'),
       ),
       body: StreamBuilder<List<Garage>>(
         stream: _firestoreService.getGarages(),
@@ -73,6 +73,7 @@ class _GarageListScreenState extends State<GarageListScreen> {
           }
 
           return ListView.builder(
+            padding: const EdgeInsets.all(8),
             itemCount: garages.length,
             itemBuilder: (context, index) {
               Garage garage = garages[index];
@@ -86,12 +87,18 @@ class _GarageListScreenState extends State<GarageListScreen> {
                     ) / 1000; // to kilometers
               }
 
-              return ListTile(
-                title: Text(garage.name),
-                subtitle: Text('Distance: ${distance.toStringAsFixed(2)} km'),
-                onTap: () {
-                  context.go('/garage-details', extra: garage);
-                },
+              return Card(
+                elevation: 2,
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                child: ListTile(
+                  leading: const Icon(Icons.store, size: 40),
+                  title: Text(garage.name, style: Theme.of(context).textTheme.titleLarge),
+                  subtitle: Text('${distance.toStringAsFixed(2)} km away'),
+                  trailing: const Icon(Icons.arrow_forward_ios),
+                  onTap: () {
+                    context.go('/garage-details', extra: garage);
+                  },
+                ),
               );
             },
           );

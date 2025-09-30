@@ -27,15 +27,23 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Select a date and time for your booking:'),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => _selectDate(context),
-              child: Text('${_selectedDate.toLocal()}'.split(' ')[0]),
+            Text(
+              'Select a date for your booking:',
+              style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 20),
+            ListTile(
+              title: Text('Date: ${_selectedDate.toLocal()}'.split(' ')[0]),
+              trailing: const Icon(Icons.calendar_today),
+              onTap: () => _selectDate(context),
+            ),
+            const SizedBox(height: 40),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 50),
+              ),
               onPressed: _bookService,
               child: const Text('Confirm Booking'),
             ),
@@ -78,7 +86,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
       );
       Navigator.pop(context);
     } else {
-       ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('You need to be logged in to book a service')),
       );
     }
