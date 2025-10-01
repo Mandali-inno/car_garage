@@ -29,8 +29,10 @@ class Garage {
   final String name;
   final GeoPoint location;
   final String ownerId;
+  final List<String> services;
+  final double rating;
 
-  Garage({required this.id, required this.name, required this.location, required this.ownerId});
+  Garage({required this.id, required this.name, required this.location, required this.ownerId, required this.services, required this.rating});
 
   factory Garage.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data() as Map<String, dynamic>;
@@ -39,6 +41,8 @@ class Garage {
       name: data['name'] ?? '',
       location: data['location'] ?? GeoPoint(0,0),
       ownerId: data['ownerId'] ?? '',
+      services: List<String>.from(data['services'] ?? []),
+      rating: (data['rating'] ?? 0).toDouble(),
     );
   }
 
@@ -47,36 +51,35 @@ class Garage {
       'name': name,
       'location': location,
       'ownerId': ownerId,
+      'services': services,
+      'rating': rating,
     };
   }
 }
 
 class Service {
   final String id;
-  final String garageId;
   final String name;
   final double price;
-  final bool isEmergency;
+  final String category; // 'Normal' or 'Emergency'
 
-  Service({required this.id, required this.garageId, required this.name, required this.price, this.isEmergency = false});
+  Service({required this.id, required this.name, required this.price, required this.category});
 
    factory Service.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data() as Map<String, dynamic>;
     return Service(
       id: doc.id,
-      garageId: data['garageId'] ?? '',
       name: data['name'] ?? '',
       price: (data['price'] ?? 0).toDouble(),
-      isEmergency: data['isEmergency'] ?? false,
+      category: data['category'] ?? 'Normal',
     );
   }
 
   Map<String, dynamic> toFirestore() {
     return {
-      'garageId': garageId,
       'name': name,
       'price': price,
-      'isEmergency': isEmergency,
+      'category': category,
     };
   }
 }
@@ -85,11 +88,11 @@ class Booking {
   final String id;
   final String userId;
   final String garageId;
-  final String serviceId;
+  final Map<String, dynamic> service;
   final DateTime bookingTime;
   final String status; // 'pending', 'confirmed', 'completed', 'cancelled'
 
-  Booking({required this.id, required this.userId, required this.garageId, required this.serviceId, required this.bookingTime, required this.status});
+  Booking({required this.id, required this.userId, required this.garageId, required this.service, required this.bookingTime, required this.status});
 
   factory Booking.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data() as Map<String, dynamic>;
@@ -97,7 +100,7 @@ class Booking {
       id: doc.id,
       userId: data['userId'] ?? '',
       garageId: data['garageId'] ?? '',
-      serviceId: data['serviceId'] ?? '',
+      service: data['service'] ?? {},
       bookingTime: (data['bookingTime'] as Timestamp).toDate(),
       status: data['status'] ?? 'pending',
     );
@@ -107,7 +110,7 @@ class Booking {
     return {
       'userId': userId,
       'garageId': garageId,
-      'serviceId': serviceId,
+      'service': service,
       'bookingTime': bookingTime,
       'status': status,
     };

@@ -40,9 +40,29 @@ class FirestoreService {
     return _db.collection('services').add(service.toFirestore());
   }
 
-  Stream<List<Service>> getServices(String garageId) {
-    return _db.collection('services').where('garageId', isEqualTo: garageId).snapshots().map((snapshot) =>
+  Stream<List<Service>> getServicesForGarage(String garageId) {
+    return _db.collection('garages').doc(garageId).snapshots().asyncMap((garageDoc) async {
+      if (!garageDoc.exists) {
+        return <Service>[];
+      }
+      List<dynamic> serviceIds = garageDoc.data()!['services'] ?? [];
+      if (serviceIds.isEmpty) {
+        return <Service>[];
+      }
+
+      final servicesSnapshot = await _db.collection('services').where(FieldPath.documentId, whereIn: serviceIds).get();
+      return servicesSnapshot.docs.map((doc) => Service.fromFirestore(doc)).toList();
+    });
+  }
+
+  Stream<List<Service>> getAllServices() {
+    return _db.collection('services').snapshots().map((snapshot) =>
         snapshot.docs.map((doc) => Service.fromFirestore(doc)).toList());
+  }
+
+  Future<Service> getService(String serviceId) async {
+    DocumentSnapshot doc = await _db.collection('services').doc(serviceId).get();
+    return Service.fromFirestore(doc);
   }
 
   Future<void> updateService(Service service) {
@@ -59,8 +79,9 @@ class FirestoreService {
   }
 
   Stream<List<Booking>> getUserBookings(String userId) {
-    return _db.collection('bookings').where('userId', isEqualTo: userId).snapshots().map((snapshot) =>
-        snapshot.docs.map((doc) => Booking.fromFirestore(doc)).toList());
+    return _db.collection('bookings').where('userId', isEqualTo: userId).snapshots().map(
+        (snapshot) =>
+            snapshot.docs.map((doc) => Booking.fromFirestore(doc)).toList());
   }
 
   // Rating operations
@@ -69,8 +90,9 @@ class FirestoreService {
   }
 
   Stream<List<Rating>> getGarageRatings(String garageId) {
-    return _db.collection('ratings').where('garageId', isEqualTo: garageId).snapshots().map((snapshot) =>
-        snapshot.docs.map((doc) => Rating.fromFirestore(doc)).toList());
+    return _db.collection('ratings').where('garageId', isEqualTo: garageId).snapshots().map(
+        (snapshot) =>
+            snapshot.docs.map((doc) => Rating.fromFirestore(doc)).toList());
   }
 
   // Emergency Service Request operations
@@ -79,7 +101,12 @@ class FirestoreService {
   }
 
   Stream<List<EmergencyServiceRequest>> getEmergencyRequests() {
-    return _db.collection('emergencyRequests').where('status', isEqualTo: 'pending').snapshots().map((snapshot) =>
-        snapshot.docs.map((doc) => EmergencyServiceRequest.fromFirestore(doc)).toList());
+    return _db
+        .collection('emergencyRequests')
+        .where('status', isEqualTo: 'pending')
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => EmergencyServiceRequest.fromFirestore(doc))
+            .toList());
   }
 }

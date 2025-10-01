@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:go_router/go_router.dart';
+import 'package:multi_select_flutter/multi_select_flutter.dart';
 import '../../models.dart';
 import '../../services/firestore_service.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fAuth;
@@ -19,11 +21,20 @@ class _AddGarageScreenState extends State<AddGarageScreen> {
   final _latitudeController = TextEditingController();
   final _longitudeController = TextEditingController();
 
+  List<String> _selectedServices = [];
+  final _serviceNameController = TextEditingController();
+  final _servicePriceController = TextEditingController();
+  String _serviceCategory = 'Normal';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add Garage'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.go('/manage-garages'),
+        ),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -84,6 +95,8 @@ class _AddGarageScreenState extends State<AddGarageScreen> {
                     return null;
                   },
                 ),
+                const SizedBox(height: 16),
+                _buildServiceManagement(),
                 const SizedBox(height: 20),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -100,6 +113,107 @@ class _AddGarageScreenState extends State<AddGarageScreen> {
     );
   }
 
+  Widget _buildServiceManagement() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Manage Services',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        TextFormField(
+          controller: _serviceNameController,
+          decoration: const InputDecoration(
+            labelText: 'Service Name',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        const SizedBox(height: 10),
+        TextFormField(
+          controller: _servicePriceController,
+          decoration: const InputDecoration(
+            labelText: 'Service Price',
+            border: OutlineInputBorder(),
+          ),
+          keyboardType: TextInputType.number,
+        ),
+        const SizedBox(height: 10),
+        DropdownButtonFormField<String>(
+          value: _serviceCategory,
+          decoration: const InputDecoration(
+            labelText: 'Service Category',
+            border: OutlineInputBorder(),
+          ),
+          items: ['Normal', 'Emergency'].map((category) {
+            return DropdownMenuItem(value: category, child: Text(category));
+          }).toList(),
+          onChanged: (value) {
+            setState(() {
+              _serviceCategory = value!;
+            });
+          },
+        ),
+        const SizedBox(height: 10),
+        ElevatedButton(
+          onPressed: _addService,
+          child: const Text('Add Service'),
+        ),
+        const SizedBox(height: 10),
+        StreamBuilder<List<Service>>(
+            stream: _firestoreService.getAllServices(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const CircularProgressIndicator();
+              }
+              final services = snapshot.data!;
+              return MultiSelectDialogField(
+                items: services.map((e) => MultiSelectItem(e.id, e.name)).toList(),
+                title: Text("Services"),
+                selectedColor: Colors.blue,
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.1),
+                  borderRadius: BorderRadius.all(Radius.circular(40)),
+                  border: Border.all(
+                    color: Colors.blue,
+                    width: 2,
+                  ),
+                ),
+                buttonIcon: Icon(
+                  Icons.arrow_downward,
+                  color: Colors.blue,
+                ),
+                buttonText: Text(
+                  "Select Services",
+                  style: TextStyle(
+                    color: Colors.blue,
+                    fontSize: 16,
+                  ),
+                ),
+                onConfirm: (results) {
+                  _selectedServices = results.cast<String>();
+                },
+              );
+            }),
+      ],
+    );
+  }
+
+  void _addService() async {
+    if (_serviceNameController.text.isNotEmpty &&
+        _servicePriceController.text.isNotEmpty) {
+      final service = Service(
+        id: '',
+        name: _serviceNameController.text,
+        price: double.parse(_servicePriceController.text),
+        category: _serviceCategory,
+      );
+      await _firestoreService.addService(service);
+      _serviceNameController.clear();
+      _servicePriceController.clear();
+    }
+  }
+
   void _addGarage() async {
     if (_formKey.currentState!.validate()) {
       fAuth.User? currentUser = _auth.currentUser;
@@ -112,9 +226,11 @@ class _AddGarageScreenState extends State<AddGarageScreen> {
             double.parse(_longitudeController.text),
           ),
           ownerId: currentUser.uid,
+          services: _selectedServices,
+          rating: 0,
         );
         await _firestoreService.addGarage(garage);
-        Navigator.pop(context);
+        context.go('/manage-garages');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('You must be logged in to add a garage')),

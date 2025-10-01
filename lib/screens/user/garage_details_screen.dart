@@ -14,6 +14,10 @@ class GarageDetailsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(garage.name),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+        ),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -31,7 +35,7 @@ class GarageDetailsScreen extends StatelessWidget {
                       Text('Services', style: Theme.of(context).textTheme.headlineSmall),
                       const SizedBox(height: 10),
                       StreamBuilder<List<Service>>(
-                        stream: _firestoreService.getServices(garage.id),
+                        stream: _firestoreService.getServicesForGarage(garage.id),
                         builder: (context, snapshot) {
                           if (snapshot.hasError) {
                             return Text('Error: ${snapshot.error}');
@@ -54,20 +58,19 @@ class GarageDetailsScreen extends StatelessWidget {
                               return ListTile(
                                 leading: const Icon(Icons.miscellaneous_services),
                                 title: Text(service.name),
-                                subtitle: Text('₹${service.price}'),
-                                trailing: ElevatedButton(
-                                  onPressed: () {
-                                    context.go(
-                                      '/book-service',
-                                      extra: {'garage': garage, 'service': service},
-                                    );
-                                  },
-                                  child: const Text('Book Now'),
-                                ),
+                                subtitle: Text('Category: ${service.category}'),
+                                trailing: Text('₹${service.price}'),
                               );
                             },
                           );
                         },
+                      ),
+                      const SizedBox(height: 10),
+                      ElevatedButton(
+                        onPressed: () {
+                          context.go('/book-service', extra: garage);
+                        },
+                        child: const Text('Book a Service'),
                       ),
                     ],
                   ),

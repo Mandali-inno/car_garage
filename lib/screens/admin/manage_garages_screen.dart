@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../models.dart';
 import '../../services/firestore_service.dart';
-import 'edit_garage_screen.dart';
 
 class ManageGaragesScreen extends StatelessWidget {
   final FirestoreService _firestoreService = FirestoreService();
@@ -56,12 +55,7 @@ class ManageGaragesScreen extends StatelessWidget {
                       IconButton(
                         icon: const Icon(Icons.edit),
                         onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => EditGarageScreen(garage: garage),
-                            ),
-                          );
+                          context.go('/edit-garage', extra: garage);
                         },
                       ),
                       IconButton(

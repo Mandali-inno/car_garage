@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:go_router/go_router.dart';
+import 'package:multi_select_flutter/multi_select_flutter.dart';
 import '../../models.dart';
 import '../../services/firestore_service.dart';
 
@@ -18,6 +20,7 @@ class _EditGarageScreenState extends State<EditGarageScreen> {
   late TextEditingController _nameController;
   late TextEditingController _latitudeController;
   late TextEditingController _longitudeController;
+  List<String> _selectedServices = [];
 
   @override
   void initState() {
@@ -25,6 +28,7 @@ class _EditGarageScreenState extends State<EditGarageScreen> {
     _nameController = TextEditingController(text: widget.garage.name);
     _latitudeController = TextEditingController(text: widget.garage.location.latitude.toString());
     _longitudeController = TextEditingController(text: widget.garage.location.longitude.toString());
+    _selectedServices = widget.garage.services;
   }
 
   @override
@@ -32,6 +36,10 @@ class _EditGarageScreenState extends State<EditGarageScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Edit Garage'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.go('/manage-garages'),
+        ),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -92,6 +100,8 @@ class _EditGarageScreenState extends State<EditGarageScreen> {
                     return null;
                   },
                 ),
+                const SizedBox(height: 16),
+                _buildServiceSelection(),
                 const SizedBox(height: 20),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -108,6 +118,46 @@ class _EditGarageScreenState extends State<EditGarageScreen> {
     );
   }
 
+  Widget _buildServiceSelection() {
+    return StreamBuilder<List<Service>>(
+      stream: _firestoreService.getAllServices(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const CircularProgressIndicator();
+        }
+        final services = snapshot.data!;
+        return MultiSelectDialogField(
+          items: services.map((e) => MultiSelectItem(e.id, e.name)).toList(),
+          title: const Text("Services"),
+          selectedColor: Colors.blue,
+          initialValue: _selectedServices,
+          decoration: BoxDecoration(
+            color: Colors.blue.withOpacity(0.1),
+            borderRadius: const BorderRadius.all(Radius.circular(40)),
+            border: Border.all(
+              color: Colors.blue,
+              width: 2,
+            ),
+          ),
+          buttonIcon: const Icon(
+            Icons.arrow_downward,
+            color: Colors.blue,
+          ),
+          buttonText: const Text(
+            "Select Services",
+            style: TextStyle(
+              color: Colors.blue,
+              fontSize: 16,
+            ),
+          ),
+          onConfirm: (results) {
+            _selectedServices = results.cast<String>();
+          },
+        );
+      },
+    );
+  }
+
   void _updateGarage() async {
     if (_formKey.currentState!.validate()) {
       final updatedGarage = Garage(
@@ -118,9 +168,11 @@ class _EditGarageScreenState extends State<EditGarageScreen> {
           double.parse(_longitudeController.text),
         ),
         ownerId: widget.garage.ownerId,
+        services: _selectedServices,
+        rating: widget.garage.rating,
       );
       await _firestoreService.updateGarage(updatedGarage);
-      Navigator.pop(context);
+      context.go('/manage-garages');
     }
   }
 }

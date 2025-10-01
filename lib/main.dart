@@ -19,6 +19,7 @@ import 'screens/user/user_bookings_screen.dart';
 import 'screens/user/emergency_service_screen.dart';
 import 'screens/admin/manage_garages_screen.dart';
 import 'screens/admin/add_garage_screen.dart';
+import 'screens/admin/edit_garage_screen.dart';
 import 'screens/admin/emergency_requests_screen.dart';
 import 'services/auth_service.dart';
 import 'services/firestore_service.dart';
@@ -213,14 +214,21 @@ class MyApp extends StatelessWidget {
               GoRoute(
                 path: '/book-service',
                 builder: (BuildContext context, GoRouterState state) {
-                  final Map<String, dynamic> args = state.extra as Map<String, dynamic>;
-                  return BookServiceScreen(garage: args['garage'], service: args['service']);
+                  final models.Garage garage = state.extra as models.Garage;
+                  return BookServiceScreen(garage: garage);
                 },
               ),
               GoRoute(
                 path: '/add-garage',
                 builder: (BuildContext context, GoRouterState state) {
                   return const AddGarageScreen();
+                },
+              ),
+              GoRoute(
+                path: '/edit-garage',
+                builder: (BuildContext context, GoRouterState state) {
+                  final models.Garage garage = state.extra as models.Garage;
+                  return EditGarageScreen(garage: garage);
                 },
               ),
             ],
@@ -274,35 +282,114 @@ class MainLayout extends StatefulWidget {
 }
 
 class _MainLayoutState extends State<MainLayout> {
-  int _currentIndex = 0;
+  models.User? _appUser;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserRole();
+  }
+
+  Future<void> _loadUserRole() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final firestoreService = Provider.of<FirestoreService>(context, listen: false);
+      final appUser = await firestoreService.getUser(user.uid);
+      if (mounted) {
+        setState(() {
+          _appUser = appUser;
+          _isLoading = false;
+        });
+      }
+    } else {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-    final isUser = user != null; // Simplified check, you might want more specific role checks
+    if (_isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    final bool isAdmin = _appUser?.role == 'admin';
+    int currentIndex = 0;
+    final String location = GoRouterState.of(context).matchedLocation;
+
+    if (isAdmin) {
+      if (location.startsWith('/admin')) currentIndex = 0;
+      if (location.startsWith('/manage-garages')) currentIndex = 1;
+      if (location.startsWith('/emergency-requests')) currentIndex = 2;
+    } else {
+      if (location.startsWith('/user')) currentIndex = 0;
+      if (location.startsWith('/garage-list')) currentIndex = 1;
+      if (location.startsWith('/my-bookings')) currentIndex = 2;
+    }
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Car Service Finder'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              await Provider.of<AuthService>(context, listen: false).signOut();
+              context.go('/login');
+            },
+          ),
+        ],
+      ),
       body: widget.child,
-      bottomNavigationBar: isUser
-          ? BottomNavigationBar(
-              currentIndex: _currentIndex,
-              onTap: (index) {
-                setState(() {
-                  _currentIndex = index;
-                });
-                switch (index) {
-                  case 0:
-                    context.go('/user');
-                    break;
-                  case 1:
-                    context.go('/garage-list');
-                    break;
-                  case 2:
-                    context.go('/my-bookings');
-                    break;
-                }
-              },
-              items: const [
+      bottomNavigationBar: _appUser == null ? null : BottomNavigationBar(
+        currentIndex: currentIndex,
+        onTap: (index) {
+          if (isAdmin) {
+            switch (index) {
+              case 0:
+                context.go('/admin');
+                break;
+              case 1:
+                context.go('/manage-garages');
+                break;
+              case 2:
+                context.go('/emergency-requests');
+                break;
+            }
+          } else { // isUser
+            switch (index) {
+              case 0:
+                context.go('/user');
+                break;
+              case 1:
+                context.go('/garage-list');
+                break;
+              case 2:
+                context.go('/my-bookings');
+                break;
+            }
+          }
+        },
+        items: isAdmin
+            ? const [
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.dashboard),
+                  label: 'Dashboard',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.store),
+                  label: 'Garages',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.warning),
+                  label: 'Emergency',
+                ),
+              ]
+            : const [
                 BottomNavigationBarItem(
                   icon: Icon(Icons.home),
                   label: 'Home',
@@ -316,45 +403,7 @@ class _MainLayoutState extends State<MainLayout> {
                   label: 'Bookings',
                 ),
               ],
-            )
-          : null,
-      drawer: isUser
-          ? null
-          : Drawer(
-              child: ListView(
-                children: [
-                  DrawerHeader(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    child: const Text('Admin Menu'),
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.dashboard),
-                    title: const Text('Dashboard'),
-                    onTap: () => context.go('/admin'),
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.store),
-                    title: const Text('Manage Garages'),
-                    onTap: () => context.go('/manage-garages'),
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.warning),
-                    title: const Text('Emergency Requests'),
-                    onTap: () => context.go('/emergency-requests'),
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.logout),
-                    title: const Text('Logout'),
-                    onTap: () {
-                      FirebaseAuth.instance.signOut();
-                      context.go('/login');
-                    },
-                  ),
-                ],
-              ),
-            ),
+      ),
     );
   }
 }
