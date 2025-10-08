@@ -7,7 +7,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
-import '../models.dart' as models;
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -44,7 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) {
         final firestoreService =
             Provider.of<FirestoreService>(context, listen: false);
-        final models.User? appUser = await firestoreService.getUser(user.uid);
+        final appUser = await firestoreService.getUser(user.uid);
 
         if (appUser == null) {
           setState(() {

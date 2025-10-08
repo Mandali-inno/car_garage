@@ -23,42 +23,46 @@ class _GarageRegistrationScreenState extends State<GarageRegistrationScreen> {
   Future<void> _registerGarage() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You must be logged in to register a garage.'),
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('You must be logged in to register a garage.'),
+          ),
+        );
+      }
       return;
     }
 
     try {
-      final garageRef = await FirebaseFirestore.instance
-          .collection('garages')
-          .add({
-            'ownerId': user.uid,
-            'name': _nameController.text,
-            'address': _addressController.text,
-            'phone': _phoneController.text,
-            'location': GeoPoint(
-              _garageLocation!.latitude,
-              _garageLocation!.longitude,
-            ),
-          });
+      final garageRef = await FirebaseFirestore.instance.collection('garages').add({
+        'ownerId': user.uid,
+        'name': _nameController.text,
+        'address': _addressController.text,
+        'phone': _phoneController.text,
+        'location': GeoPoint(
+          _garageLocation!.latitude,
+          _garageLocation!.longitude,
+        ),
+      });
 
       await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
         'role': 'garage_owner',
         'garageId': garageRef.id,
       }, SetOptions(merge: true));
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Garage registered successfully!')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Garage registered successfully!')),
+        );
 
-      context.go('/garage-management');
+        context.go('/garage-management');
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error registering garage: ${e.toString()}')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error registering garage: ${e.toString()}')),
+        );
+      }
     }
   }
 

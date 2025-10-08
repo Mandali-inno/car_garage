@@ -131,4 +131,9 @@ class AuthService {
     await _googleSignIn.signOut();
     await _auth.signOut();
   }
+
+  Future<String?> getUserRole(String uid) async {
+    models.User? user = await _firestoreService.getUser(uid);
+    return user?.role;
+  }
 }

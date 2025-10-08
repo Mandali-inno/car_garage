@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart' as fAuth;
+import 'package:firebase_auth/firebase_auth.dart' as f_auth;
 import '../../models.dart';
 import '../../services/firestore_service.dart';
 
@@ -12,7 +12,7 @@ class UserBookingsScreen extends StatefulWidget {
 
 class _UserBookingsScreenState extends State<UserBookingsScreen> {
   final FirestoreService _firestoreService = FirestoreService();
-  final fAuth.FirebaseAuth _auth = fAuth.FirebaseAuth.instance;
+  final f_auth.FirebaseAuth _auth = f_auth.FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {

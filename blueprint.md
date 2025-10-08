@@ -12,7 +12,7 @@ The Car Service Finder is a Flutter application that connects car owners with se
 *   **User:**
     *   `uid`: String
     *   `email`: String
-    *   `role`: String ('user' or 'admin')
+    *   `role`: String ('user', 'admin', or 'garageOwner')
 *   **Garage:**
     *   `id`: String
     *   `name`: String
@@ -20,6 +20,7 @@ The Car Service Finder is a Flutter application that connects car owners with se
     *   `location`: GeoPoint
     *   `services`: List<Service>
     *   `rating`: double
+    *   `garageOwnerId`: String
 *   **Service:**
     *   `id`: String
     *   `name`: String
@@ -61,6 +62,12 @@ The Car Service Finder is a Flutter application that connects car owners with se
 *   **Dashboard:** Provides an overview of the system and access to the admin features.
 *   **Manage Garages:** Allows admins to add, edit, and delete garages, including their services.
 *   **Emergency Requests:** Displays a list of pending emergency service requests, with the ability to view the user's location on a map.
+
+### Garage Owner Features
+
+*   **Dashboard:** A dedicated dashboard for garage owners to manage their garage.
+*   **View Bookings:** Allows garage owners to see all bookings for their garage.
+*   **Edit Garage Details:** Garage owners can edit the details of their garage.
 
 ## 4. Implementation Plan
 

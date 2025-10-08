@@ -12,6 +12,7 @@ import 'screens/login_screen.dart';
 import 'screens/registration_screen.dart';
 import 'screens/user/user_dashboard_screen.dart';
 import 'screens/admin/admin_dashboard_screen.dart';
+import 'screens/garage_owner/garage_owner_dashboard_screen.dart';
 import 'screens/user/garage_list_screen.dart';
 import 'screens/user/garage_details_screen.dart';
 import 'screens/user/book_service_screen.dart';
@@ -181,13 +182,19 @@ class MyApp extends StatelessWidget {
                   GoRoute(
                     path: '/emergency-service',
                     builder: (BuildContext context, GoRouterState state) {
-                      return EmergencyServiceScreen();
+                      return const EmergencyServiceScreen();
                     },
                   ),
                   GoRoute(
                     path: '/admin',
                     builder: (BuildContext context, GoRouterState state) {
                       return const AdminDashboardScreen();
+                    },
+                  ),
+                   GoRoute(
+                    path: '/garage-owner',
+                    builder: (BuildContext context, GoRouterState state) {
+                      return const GarageOwnerDashboardScreen();
                     },
                   ),
                   GoRoute(
@@ -247,6 +254,8 @@ class MyApp extends StatelessWidget {
                   if (appUser != null) {
                     if (appUser.role == 'admin') {
                       return '/admin';
+                    } else if (appUser.role == 'garageOwner') {
+                      return '/garage-owner';
                     } else {
                       return '/user';
                     }
@@ -318,6 +327,7 @@ class _MainLayoutState extends State<MainLayout> {
     }
 
     final bool isAdmin = _appUser?.role == 'admin';
+    final bool isGarageOwner = _appUser?.role == 'garageOwner';
     int currentIndex = 0;
     final String location = GoRouterState.of(context).matchedLocation;
 
@@ -325,7 +335,9 @@ class _MainLayoutState extends State<MainLayout> {
       if (location.startsWith('/admin')) currentIndex = 0;
       if (location.startsWith('/manage-garages')) currentIndex = 1;
       if (location.startsWith('/emergency-requests')) currentIndex = 2;
-    } else {
+    } else if (isGarageOwner) {
+       if (location.startsWith('/garage-owner')) currentIndex = 0;
+    }else {
       if (location.startsWith('/user')) currentIndex = 0;
       if (location.startsWith('/garage-list')) currentIndex = 1;
       if (location.startsWith('/my-bookings')) currentIndex = 2;
@@ -339,7 +351,9 @@ class _MainLayoutState extends State<MainLayout> {
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await Provider.of<AuthService>(context, listen: false).signOut();
-              context.go('/login');
+              if (mounted) {
+                context.go('/login');
+              }
             },
           ),
         ],
@@ -360,7 +374,13 @@ class _MainLayoutState extends State<MainLayout> {
                 context.go('/emergency-requests');
                 break;
             }
-          } else { // isUser
+          } else if (isGarageOwner) {
+            switch (index) {
+              case 0:
+                context.go('/garage-owner');
+                break;
+            }
+          }else { // isUser
             switch (index) {
               case 0:
                 context.go('/user');
@@ -389,7 +409,12 @@ class _MainLayoutState extends State<MainLayout> {
                   label: 'Emergency',
                 ),
               ]
-            : const [
+            : isGarageOwner ? const [
+               BottomNavigationBarItem(
+                  icon: Icon(Icons.garage),
+                  label: 'My Garage',
+                ),
+            ] : const [
                 BottomNavigationBarItem(
                   icon: Icon(Icons.home),
                   label: 'Home',

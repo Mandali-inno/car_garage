@@ -17,6 +17,15 @@ class FirestoreService {
     return null;
   }
 
+  Future<List<User>> getUsers() async {
+    QuerySnapshot snapshot = await _db.collection('users').get();
+    return snapshot.docs.map((doc) => User.fromFirestore(doc)).toList();
+  }
+
+  Future<void> updateUserRole(String uid, String role) {
+    return _db.collection('users').doc(uid).update({'role': role});
+  }
+
   // Garage operations
   Future<void> addGarage(Garage garage) {
     return _db.collection('garages').add(garage.toFirestore());
@@ -25,6 +34,18 @@ class FirestoreService {
   Stream<List<Garage>> getGarages() {
     return _db.collection('garages').snapshots().map((snapshot) =>
         snapshot.docs.map((doc) => Garage.fromFirestore(doc)).toList());
+  }
+
+  Future<Garage?> getGarageByOwner(String ownerId) async {
+    QuerySnapshot snapshot = await _db
+        .collection('garages')
+        .where('garageOwnerId', isEqualTo: ownerId)
+        .limit(1)
+        .get();
+    if (snapshot.docs.isNotEmpty) {
+      return Garage.fromFirestore(snapshot.docs.first);
+    }
+    return null;
   }
 
   Future<void> updateGarage(Garage garage) {
@@ -84,6 +105,19 @@ class FirestoreService {
             snapshot.docs.map((doc) => Booking.fromFirestore(doc)).toList());
   }
 
+  Future<List<Booking>> getBookingsForGarage(String garageId) async {
+    QuerySnapshot snapshot = await _db
+        .collection('bookings')
+        .where('garageId', isEqualTo: garageId)
+        .orderBy('bookingTime', descending: true)
+        .get();
+    return snapshot.docs.map((doc) => Booking.fromFirestore(doc)).toList();
+  }
+
+  Future<void> updateBookingStatus(String bookingId, String status) {
+    return _db.collection('bookings').doc(bookingId).update({'status': status});
+  }
+
   // Rating operations
   Future<void> addRating(Rating rating) {
     return _db.collection('ratings').add(rating.toFirestore());
@@ -93,6 +127,14 @@ class FirestoreService {
     return _db.collection('ratings').where('garageId', isEqualTo: garageId).snapshots().map(
         (snapshot) =>
             snapshot.docs.map((doc) => Rating.fromFirestore(doc)).toList());
+  }
+  
+  Future<List<Rating>> getRatingsForGarage(String garageId) async {
+    QuerySnapshot snapshot = await _db
+        .collection('ratings')
+        .where('garageId', isEqualTo: garageId)
+        .get();
+    return snapshot.docs.map((doc) => Rating.fromFirestore(doc)).toList();
   }
 
   // Emergency Service Request operations

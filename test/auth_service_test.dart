@@ -54,6 +54,10 @@ void main() {
 
     test('createUserWithEmailAndPassword calls correct method', () async {
       final mockUserCredential = MockUserCredential();
+      final mockUser = MockUser();
+      when(mockUserCredential.user).thenReturn(mockUser);
+      when(mockUser.uid).thenReturn("uid");
+
       when(
         mockFirebaseAuth.createUserWithEmailAndPassword(
           email: 'test@test.com',
@@ -64,6 +68,7 @@ void main() {
       await authService.createUserWithEmailAndPassword(
         'test@test.com',
         'password',
+        'user',
       );
 
       verify(

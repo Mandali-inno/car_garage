@@ -132,7 +132,7 @@ class _EditGarageScreenState extends State<EditGarageScreen> {
           selectedColor: Colors.blue,
           initialValue: _selectedServices,
           decoration: BoxDecoration(
-            color: Colors.blue.withOpacity(0.1),
+            color: Colors.blue.withAlpha(25),
             borderRadius: const BorderRadius.all(Radius.circular(40)),
             border: Border.all(
               color: Colors.blue,
@@ -167,12 +167,14 @@ class _EditGarageScreenState extends State<EditGarageScreen> {
           double.parse(_latitudeController.text),
           double.parse(_longitudeController.text),
         ),
-        ownerId: widget.garage.ownerId,
+        garageOwnerId: widget.garage.garageOwnerId,
         services: _selectedServices,
         rating: widget.garage.rating,
       );
       await _firestoreService.updateGarage(updatedGarage);
-      context.go('/manage-garages');
+      if (mounted) {
+        context.go('/manage-garages');
+      }
     }
   }
 }

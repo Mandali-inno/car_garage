@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart' as fAuth;
+import 'package:firebase_auth/firebase_auth.dart' as f_auth;
 import '../../models.dart';
 import '../../services/firestore_service.dart';
 
@@ -16,7 +15,7 @@ class BookServiceScreen extends StatefulWidget {
 
 class _BookServiceScreenState extends State<BookServiceScreen> {
   final FirestoreService _firestoreService = FirestoreService();
-  final fAuth.FirebaseAuth _auth = fAuth.FirebaseAuth.instance;
+  final f_auth.FirebaseAuth _auth = f_auth.FirebaseAuth.instance;
   String? _selectedService;
   DateTime _selectedDate = DateTime.now();
 
@@ -53,7 +52,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                 final services = snapshot.data!;
 
                 return DropdownButtonFormField<String>(
-                  value: _selectedService,
+                  initialValue: _selectedService,
                   hint: const Text('Select a service'),
                   onChanged: (value) {
                     setState(() {
@@ -84,20 +83,22 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                   lastDate: DateTime.now().add(const Duration(days: 365)),
                 );
                 if (date != null) {
-                  final time = await showTimePicker(
-                    context: context,
-                    initialTime: TimeOfDay.fromDateTime(_selectedDate),
-                  );
-                  if (time != null) {
-                    setState(() {
-                      _selectedDate = DateTime(
-                        date.year,
-                        date.month,
-                        date.day,
-                        time.hour,
-                        time.minute,
-                      );
-                    });
+                  if (mounted) {
+                    final time = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay.fromDateTime(_selectedDate),
+                    );
+                    if (time != null) {
+                      setState(() {
+                        _selectedDate = DateTime(
+                          date.year,
+                          date.month,
+                          date.day,
+                          time.hour,
+                          time.minute,
+                        );
+                      });
+                    }
                   }
                 }
               },
@@ -117,16 +118,21 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
   void _bookService() async {
     final user = _auth.currentUser;
     if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('You must be logged in to book a service.')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('You must be logged in to book a service.')),
+        );
+      }
       return;
     }
 
     if (_selectedService == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a service.')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select a service.')),
+        );
+      }
       return;
     }
 
@@ -143,9 +149,11 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
 
     await _firestoreService.createBooking(booking);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Booking successful!')),
-    );
-    context.pop();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Booking successful!')),
+      );
+      context.pop();
+    }
   }
 }

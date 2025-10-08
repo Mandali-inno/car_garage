@@ -28,13 +28,24 @@ class _GarageListScreenState extends State<GarageListScreen> {
 
   Future<void> _getCurrentLocation() async {
     try {
-      Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          // Permissions are denied, next time you could try
+          // requesting permissions again (this is also where
+          // Android's shouldShowRequestPermissionRationale
+          // returned true. According to Android guidelines
+          // your App should show an explanatory UI now.
+          return Future.error('Location permissions are denied');
+        }
+      }
+      Position position = await Geolocator.getCurrentPosition();
       setState(() {
         _currentPosition = position;
       });
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
     }
   }
 
@@ -95,8 +106,8 @@ class _GarageListScreenState extends State<GarageListScreen> {
                   }).toList(),
                 ),
                 ElevatedButton.icon(
-                  icon: Icon(Icons.filter_list),
-                  label: Text('Filter'),
+                  icon: const Icon(Icons.filter_list),
+                  label: const Text('Filter'),
                   onPressed: _showFilterDialog,
                 ),
               ],

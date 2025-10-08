@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class User {
   final String uid;
   final String email;
-  final String role; // 'user' or 'admin'
+  final String role; // 'user', 'admin', or 'garageOwner'
 
   User({required this.uid, required this.email, required this.role});
 
@@ -28,11 +28,11 @@ class Garage {
   final String id;
   final String name;
   final GeoPoint location;
-  final String ownerId;
+  final String garageOwnerId;
   final List<String> services;
   final double rating;
 
-  Garage({required this.id, required this.name, required this.location, required this.ownerId, required this.services, required this.rating});
+  Garage({required this.id, required this.name, required this.location, required this.garageOwnerId, required this.services, required this.rating});
 
   factory Garage.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data() as Map<String, dynamic>;
@@ -40,7 +40,7 @@ class Garage {
       id: doc.id,
       name: data['name'] ?? '',
       location: data['location'] ?? GeoPoint(0,0),
-      ownerId: data['ownerId'] ?? '',
+      garageOwnerId: data['garageOwnerId'] ?? '',
       services: List<String>.from(data['services'] ?? []),
       rating: (data['rating'] ?? 0).toDouble(),
     );
@@ -50,7 +50,7 @@ class Garage {
     return {
       'name': name,
       'location': location,
-      'ownerId': ownerId,
+      'garageOwnerId': garageOwnerId,
       'services': services,
       'rating': rating,
     };

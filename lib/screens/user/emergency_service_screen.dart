@@ -3,7 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../models.dart';
 import '../../services/firestore_service.dart';
-import 'package:firebase_auth/firebase_auth.dart' as fAuth;
+import 'package:firebase_auth/firebase_auth.dart' as f_auth;
 
 class EmergencyServiceScreen extends StatefulWidget {
   const EmergencyServiceScreen({super.key});
@@ -16,7 +16,7 @@ class _EmergencyServiceScreenState extends State<EmergencyServiceScreen> {
   final FirestoreService _firestoreService = FirestoreService();
   String _selectedService = 'breakdown';
   Position? _currentPosition;
-  final fAuth.FirebaseAuth _auth = fAuth.FirebaseAuth.instance;
+  final f_auth.FirebaseAuth _auth = f_auth.FirebaseAuth.instance;
 
   @override
   void initState() {
@@ -26,13 +26,24 @@ class _EmergencyServiceScreenState extends State<EmergencyServiceScreen> {
 
   Future<void> _getCurrentLocation() async {
     try {
-      Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          // Permissions are denied, next time you could try
+          // requesting permissions again (this is also where
+          // Android's shouldShowRequestPermissionRationale
+          // returned true. According to Android guidelines
+          // your App should show an explanatory UI now.
+          return Future.error('Location permissions are denied');
+        }
+      }
+      Position position = await Geolocator.getCurrentPosition();
       setState(() {
         _currentPosition = position;
       });
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
     }
   }
 
@@ -82,7 +93,7 @@ class _EmergencyServiceScreenState extends State<EmergencyServiceScreen> {
   }
 
   void _submitRequest() async {
-    fAuth.User? currentUser = _auth.currentUser;
+    f_auth.User? currentUser = _auth.currentUser;
     if (currentUser != null) {
       final request = EmergencyServiceRequest(
         id: '', // Firestore will generate an ID
@@ -94,15 +105,20 @@ class _EmergencyServiceScreenState extends State<EmergencyServiceScreen> {
       );
 
       await _firestoreService.createEmergencyRequest(request);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Emergency request submitted!')),
+        );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Emergency request submitted!')),);
-
-      Navigator.pop(context);
+        Navigator.pop(context);
+      }
     } else {
-       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('You need to be logged in to make a request')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('You need to be logged in to make a request')),
+        );
+      }
     }
   }
 }

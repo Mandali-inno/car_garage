@@ -19,8 +19,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authService = Provider.of<AuthService>(context);
-
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
@@ -65,7 +63,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
-                  value: _selectedRole,
+                  initialValue: _selectedRole,
                   items: ['user', 'admin']
                       .map((role) => DropdownMenuItem(
                             value: role,
@@ -92,14 +90,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   ),
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
+                      final authService = Provider.of<AuthService>(context, listen: false);
+                      final router = GoRouter.of(context);
                       await authService.createUserWithEmailAndPassword(
                         _emailController.text,
                         _passwordController.text,
                         _selectedRole,
                       );
-                      if (mounted) {
-                        context.go('/login');
-                      }
+                      router.go('/login');
                     }
                   },
                   child: const Text('Register'),

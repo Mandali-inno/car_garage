@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import '../../models.dart';
 import '../../services/firestore_service.dart';
-import 'package:firebase_auth/firebase_auth.dart' as fAuth;
+import 'package:firebase_auth/firebase_auth.dart' as f_auth;
 
 class AddGarageScreen extends StatefulWidget {
   const AddGarageScreen({super.key});
@@ -15,7 +15,7 @@ class AddGarageScreen extends StatefulWidget {
 
 class _AddGarageScreenState extends State<AddGarageScreen> {
   final FirestoreService _firestoreService = FirestoreService();
-  final fAuth.FirebaseAuth _auth = fAuth.FirebaseAuth.instance;
+  final f_auth.FirebaseAuth _auth = f_auth.FirebaseAuth.instance;
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _latitudeController = TextEditingController();
@@ -117,7 +117,7 @@ class _AddGarageScreenState extends State<AddGarageScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'Manage Services',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
@@ -140,7 +140,7 @@ class _AddGarageScreenState extends State<AddGarageScreen> {
         ),
         const SizedBox(height: 10),
         DropdownButtonFormField<String>(
-          value: _serviceCategory,
+          initialValue: _serviceCategory,
           decoration: const InputDecoration(
             labelText: 'Service Category',
             border: OutlineInputBorder(),
@@ -169,21 +169,21 @@ class _AddGarageScreenState extends State<AddGarageScreen> {
               final services = snapshot.data!;
               return MultiSelectDialogField(
                 items: services.map((e) => MultiSelectItem(e.id, e.name)).toList(),
-                title: Text("Services"),
+                title: const Text("Services"),
                 selectedColor: Colors.blue,
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
-                  borderRadius: BorderRadius.all(Radius.circular(40)),
+                  color: Colors.blue.withAlpha(25),
+                  borderRadius: const BorderRadius.all(Radius.circular(40)),
                   border: Border.all(
                     color: Colors.blue,
                     width: 2,
                   ),
                 ),
-                buttonIcon: Icon(
+                buttonIcon: const Icon(
                   Icons.arrow_downward,
                   color: Colors.blue,
                 ),
-                buttonText: Text(
+                buttonText: const Text(
                   "Select Services",
                   style: TextStyle(
                     color: Colors.blue,
@@ -216,7 +216,7 @@ class _AddGarageScreenState extends State<AddGarageScreen> {
 
   void _addGarage() async {
     if (_formKey.currentState!.validate()) {
-      fAuth.User? currentUser = _auth.currentUser;
+      f_auth.User? currentUser = _auth.currentUser;
       if (currentUser != null) {
         final garage = Garage(
           id: '', // Firestore will generate ID
@@ -225,16 +225,21 @@ class _AddGarageScreenState extends State<AddGarageScreen> {
             double.parse(_latitudeController.text),
             double.parse(_longitudeController.text),
           ),
-          ownerId: currentUser.uid,
+          garageOwnerId: currentUser.uid,
           services: _selectedServices,
           rating: 0,
         );
         await _firestoreService.addGarage(garage);
-        context.go('/manage-garages');
+        if (mounted) {
+          context.go('/manage-garages');
+        }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You must be logged in to add a garage')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('You must be logged in to add a garage')),
+          );
+        }
       }
     }
   }
